@@ -1,0 +1,242 @@
+@font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('fonts/fa-regular-400.eot');
+  src: url('fonts/fa-regular-400.eot?#iefix') format('embedded-opentype'),
+  url('fonts/fa-regular-400.woff2') format('woff2'),
+  url('fonts/fa-regular-400.woff') format('woff'),
+  url('fonts/fa-regular-400.ttf') format('truetype'),
+  url('fonts/fa-regular-400.svg#fontawesome') format('svg');
+}
+
+@font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url('fonts/fa-solid-900.eot');
+  src: url('fonts/fa-solid-900.eot?#iefix') format('embedded-opentype'),
+  url('fonts/fa-solid-900.woff2') format('woff2'),
+  url('fonts/fa-solid-900.woff') format('woff'),
+  url('fonts/fa-solid-900.ttf') format('truetype'),
+  url('fonts/fa-solid-900.svg#fontawesome') format('svg');
+}
+
+:root {
+    --border-color: #ccc;
+    --link-color: #9d2963;
+}
+
+.screen-reader-text {
+    position:absolute;
+    top:-9999px;
+    left:-9999px
+}
+
+body {
+    overflow-x: hidden;
+}
+
+body {
+    font-family: Merriweather, Georgia, sans-serif;
+    font-size: 14px;
+    margin: 0;
+}
+blockquote {
+    font-size: 15px;
+    font-style: italic;
+    padding: .25em 0 .25em .5em;
+    border-left: 4px solid #ddd;
+    margin: 0;
+}
+
+a:link,
+a:visited {
+    color: var(--link-color);
+}
+
+h1 {
+    font-size: 1.4em;
+}
+#viewer {
+    display: grid;
+    justify-content: center;
+    height: 100vh;
+    max-width: 150ch;
+    margin: 0 auto;
+    grid-template:
+        "meta meta" min-content
+        "player player" minmax(200px, 1fr)
+        "transcript index" minmax(200px, 2fr) / 3fr 2fr;
+}
+#viewer.audio {
+    grid-template:
+        "meta meta" min-content
+        "player player" min-content
+        "transcript index" minmax(200px, 2fr) / 3fr 2fr;
+}
+#main-metadata {
+    text-align: center;
+    grid-area: meta;
+    padding-bottom: 1em;
+}
+
+#main-metadata:empty {
+    padding: 0;
+}
+
+#player {
+    grid-area: player;
+}
+#transcript-window {
+    grid-area: transcript;
+}
+#index {
+    grid-area: index;
+    border-left: 1px solid var(--border-color);
+    background: linear-gradient(to right, rgba(0,0,0,.15), #fff 1rem);
+    padding-top: 1em;
+}
+#viewer.no-transcript  #index {
+    grid-column-start: transcript;
+    max-width: 60ch;
+    justify-self: center;
+}
+#viewer.no-transcript #transcript-window {
+    display: none;
+}
+#viewer.no-index #index {
+    display: none;
+}
+#viewer.no-index #transcript-window {
+    grid-column-end: index;
+    max-width: 90ch;
+    justify-self: center;
+}
+#transcript {
+    position: relative;
+    margin-left: 10ch;
+    margin-top: 2em;
+}
+#transcript .timestamp-link {
+    position: absolute;
+    left: -10ch;
+}
+
+#transcript .index-link {
+    position: absolute;
+    left: -2.25ch;
+    font-size: 12px;
+}
+
+#transcript-window, #index {
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    padding-right: 1em;
+}
+#transcript > :first-child, #index > :first-child {
+    margin-top: 0;
+}
+#player iframe {
+    display: block;
+    aspect-ratio: 16/9;
+    height: 100% !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+    border: none;
+}
+#player video {
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+#player audio {
+    display: block;
+    margin: 0 auto;
+    width: 75%;
+}
+.timestamp-link, .index-link {
+    font-family: sans-serif;
+}
+.index-point {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: .5em;
+    padding: .75rem .75rem .75rem 1.25rem;
+}
+
+.index-point:not(:last-child) {
+    border-bottom: 1px solid #ccc;
+}
+
+.index-point > .index-point-content {
+    grid-column: span 2;
+    display: none;
+}
+
+.index-point > .index-point-content.active {
+    display: block;
+}
+
+.index-title {
+    font-weight: bold;
+}
+
+#player {
+    position: relative;
+}
+
+#player:before {
+    content: "";
+    position: absolute;
+    left: -9999px;
+    right: -9999px;
+    top: 0;
+    bottom: 0;
+    background: #000;
+    z-index: -1;
+}
+
+.index-link:before,
+.transcript-index-link:before {
+    content: "\f02e";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.transcript-index-link {
+    width: .75rem;
+}
+
+.index-actions {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+}
+
+.transcript-index-text-toggle {
+    appearance: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    width: .75rem;
+    color: var(--link-color);
+}
+
+.transcript-index-text-toggle:before {
+    content: "\f0da";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.transcript-index-text-toggle.active:before {
+    content: "\f0d7";
+}

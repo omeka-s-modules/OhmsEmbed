@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="ohms.js"></script>
+<link href="ohms.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400;1,700" rel="stylesheet">
+</head>
+<body>
+    <div id="viewer">
+        <div id="main-metadata"></div>
+        <div id="player"></div>
+        <div id="transcript-window">
+            <div id="transcript"></div>
+        </div>
+        <div id="index"></div>
+        </div>
+    </div>
+</body>
+<script>
+    let params = new URLSearchParams(window.location.search);
+    main(params.get('cachefile'), params.get('translate') === '1', params.get('metadata') !== 'none');
+</script>
+</html>
