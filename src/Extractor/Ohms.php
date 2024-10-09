@@ -31,13 +31,14 @@ class Ohms implements ExtractorInterface
         $doc = new DomDocument;
         $doc->load($filePath);
 
-        $record = $doc->documentElement->childNodes->item(0);
-        if (!$record || !$record->tagName === 'record') {
-            return $metadata;
-        }
-
         $xpath = new DOMXPath($doc);
         $xpath->registerNamespace('o', 'https://www.weareavp.com/nunncenter/ohms');
+
+        $recordQuery = $xpath->query('//o:ROOT/o:record');
+        if (!$recordQuery->count()) {
+            return $metadata;
+        }
+        $record = $recordQuery->item(0);
 
         $xpaths = [
             'id' => 'string(@id)',
