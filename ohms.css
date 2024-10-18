@@ -320,8 +320,9 @@ h1 {
 }
 
 #info {
+    width: 90ch;
     padding: 1rem;
-    border: 1rem solid transparent;
+    border: 1px solid var(--border-color);
     box-sizing: border-box;
 }
 
