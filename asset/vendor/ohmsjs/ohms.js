@@ -795,7 +795,7 @@ function setUpControls(data) {
         type: 'button',
         textContent: 'Toggle index'
     })
-    indexMobileButton.addEventListener('click', async () => {
+    indexMobileButton.addEventListener('click', () => {
         document.body.classList.toggle('mobile-index-active');
     });
     controls.appendChild(indexMobileButton);
@@ -842,20 +842,26 @@ function setUpControls(data) {
             ariaLabel: 'Fullscreen',
             title: 'Fullscreen'
         });
-        fullscreenButton.addEventListener('click', async (e) => {
-            e.preventDefault();
+        document.body.addEventListener('fullscreenchange', (e) => {
             if (document.fullscreenElement) {
-                await document.exitFullscreen();
-                fullscreenButton.ariaLabel = 'Fullscreen';
-                fullscreenButton.title = 'Fullscreen';
-                fullscreenButton.className = 'fa enter-fullscreen';
-            } else {
-                await document.body.requestFullscreen();
                 fullscreenButton.ariaLabel = 'Exit Fullscreen';
                 fullscreenButton.title = 'Exit Fullscreen';
                 fullscreenButton.className = 'fa exit-fullscreen';
+            } else {
+                fullscreenButton.ariaLabel = 'Fullscreen';
+                fullscreenButton.title = 'Fullscreen';
+                fullscreenButton.className = 'fa enter-fullscreen';
             }
         });
+        fullscreenButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                document.body.requestFullscreen();
+            }
+        });
+
         controls.appendChild(fullscreenButton);
     }
 }
