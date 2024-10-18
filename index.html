@@ -8,18 +8,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400;1,700" rel="stylesheet">
 </head>
 <body>
-    <div id="viewer">
+    <div id="viewer" role="main">
         <div id="main-metadata"></div>
         <div id="player"></div>
+        <div id="controls"></div>
         <div id="transcript-window">
             <div id="transcript"></div>
         </div>
         <div id="index"></div>
         </div>
     </div>
+    <dialog id="info">
+        <button id="info-close" class="fa" aria-label="Close" title="Close" autofocus></button>
+        <div id="info-content"></div>
+    </dialog>
 </body>
 <script>
-    let params = new URLSearchParams(window.location.search);
-    main(params.get('cachefile'), params.get('translate') === '1', params.get('metadata') !== 'none');
+    main(Object.fromEntries(new URLSearchParams(window.location.search)));
 </script>
 </html>
