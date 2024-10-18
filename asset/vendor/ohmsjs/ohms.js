@@ -32,6 +32,7 @@ async function parse(url) {
         rights: getChildText(record, 'rights'),
         usage: getChildText(record, 'usage'),
         repository: getChildText(record, 'repository'),
+        repository_url: getChildText(record, 'repository_url'),
         kembed: getChildText(record, 'kembed'),
         language: getChildText(record, 'language'),
         transcript_alt_lang: getChildText(record, 'transcript_alt_lang'),
@@ -42,6 +43,8 @@ async function parse(url) {
         transcript_alt: getChildText(record, 'transcript_alt'),
         vtt_transcript: getChildText(record, 'vtt_transcript'),
         vtt_transcript_alt: getChildText(record, 'vtt_transcript_alt'),
+        interviewer: getChildrenTexts(record, 'interviewer'),
+        interviewee: getChildrenTexts(record, 'interviewee'),
     }
 
     const mediafile = record.querySelector('mediafile');
@@ -57,22 +60,30 @@ async function parse(url) {
             time: parseInt(getChildText(point, 'time'), 10),
             title: getChildText(point, 'title'),
             title_alt: getChildText(point, 'title_alt'),
-            partial_transcript: getChildText(point, 'partial_transcript'),
-            partial_transcript_alt: getChildText(point, 'partial_transcript_alt'),
-            synopsis: getChildText(point, 'synopsis'),
-            synopsis_alt: getChildText(point, 'synopsis_alt'),
-            keywords: getChildText(point, 'keywords'),
-            keywords_alt: getChildText(point, 'keywords_alt'),
-            subjects: getChildText(point, 'subjects'),
-            subjects_alt: getChildText(point, 'subjects_alt'),
+            partial_transcript: getChildText(point, 'partial_transcript').trim(),
+            partial_transcript_alt: getChildText(point, 'partial_transcript_alt').trim(),
+            synopsis: getChildText(point, 'synopsis').trim(),
+            synopsis_alt: getChildText(point, 'synopsis_alt').trim(),
+            keywords: getChildText(point, 'keywords').trim(),
+            keywords_alt: getChildText(point, 'keywords_alt').trim(),
+            subjects: getChildText(point, 'subjects').trim(),
+            subjects_alt: getChildText(point, 'subjects_alt').trim(),
         };
         const gpsPoints = point.querySelectorAll(':scope > gpspoints');
         pointData.gps_points = Array.from(gpsPoints, (gpspoint) => {
             return {
-                gps: getChildText(gpspoint, 'gps'),
-                gps_zoom: getChildText(gpspoint, 'gps_zoom'),
-                gps_text: getChildText(gpspoint, 'gps_text'),
-                gps_text_alt: getChildText(gpspoint, 'gps_text_alt'),
+                gps: getChildText(gpspoint, 'gps').trim(),
+                gps_zoom: getChildText(gpspoint, 'gps_zoom').trim(),
+                gps_text: getChildText(gpspoint, 'gps_text').trim(),
+                gps_text_alt: getChildText(gpspoint, 'gps_text_alt').trim(),
+            };
+        });
+        const hyperlinks = point.querySelectorAll(':scope > hyperlinks');
+        pointData.hyperlinks = Array.from(hyperlinks, (hyperlink) => {
+            return {
+                hyperlink: getChildText(hyperlink, 'hyperlink').trim(),
+                hyperlink_text: getChildText(hyperlink, 'hyperlink_text').trim(),
+                hyperlink_text_alt: getChildText(hyperlink, 'hyperlink_text_alt').trim(),
             };
         });
         return pointData;
@@ -81,9 +92,22 @@ async function parse(url) {
     return data;
 }
 
+function ensureAbsolute(url) {
+    const absRegex = /^https?:\/\//i;
+    if (!absRegex.test(url)) {
+        return 'http://' + url;
+    }
+    return url;
+}
+
 function getChildText(element, childName) {
-    const child = element.querySelector(':scope > ' + childName)
+    const child = element.querySelector(':scope > ' + childName);
     return child ? child.textContent : '';
+}
+
+function getChildrenTexts(element, childName) {
+    const children = element.querySelectorAll(':scope > ' + childName);
+    return Array.from(children, (child) => child.textContent);
 }
 
 function parseSyncString(sync) {
@@ -126,7 +150,6 @@ function formatTime(seconds) {
 function displayTranscript(transcript, sync, indexPoints) {
     const [realTranscript, footnoteContainer] = extractFootnotes(transcript);
     const lines = realTranscript.split('\n');
-    const transcriptContainer = document.querySelector('#transcript');
     const frag = document.createDocumentFragment();
     const speakerRegex = /^\s*([A-Z-.\' ]+:)(.*)$/;
     const footnoteRegex = /\[\[footnote\]\]([0-9]+?)\[\[\/footnote\]\]/;
@@ -161,8 +184,10 @@ function displayTranscript(transcript, sync, indexPoints) {
         if (typeof indexPoint === 'number') {
             span.appendChild(createElement('a', {
                 href: '#index-point-' + indexPoint,
-                className: 'index-link',
+                className: 'fa index-link',
                 id: 'transcript-index-point-' + indexPoint,
+                ariaLabel: 'Read index notes',
+                title: 'Read index notes'
             }));
         }
         if (paraNew) {
@@ -193,10 +218,11 @@ function displayTranscript(transcript, sync, indexPoints) {
             paraNew = false;
         }
     });
-    transcriptContainer.appendChild(frag);
+    frag.appendChild(para);
     if (footnoteContainer) {
-        transcriptContainer.appendChild(footnoteContainer);
+        frag.appendChild(footnoteContainer);
     }
+    return frag;
 }
 
 function getIndexLines(syncData, indexPoints) {
@@ -232,7 +258,6 @@ function extractFootnotes(transcript) {
     const regex = /\[\[footnotes\]\](.*)\[\[\/footnotes\]\]/s;
     const noteRegex = /\[\[note\]\](.*?)\[\[\/note\]\]/sg;
     const noteLinkRegex = /\[\[link\]\](.*?)\[\[\/link\]\]/s;
-    const urlRegex = /^https?:\/\//;
     const matches = transcript.split(regex);
     if (matches.length === 1) {
         return [transcript, null];
@@ -261,11 +286,8 @@ function extractFootnotes(transcript) {
                 return '';
             });
             if (noteUrl) {
-                if (!urlRegex.test(noteUrl)) {
-                    noteUrl = 'http://' + noteUrl;
-                }
                 footnote.appendChild(createElement('a', {
-                    href: noteUrl,
+                    href: ensureAbsolute(noteUrl),
                     textContent: noteContents.trim(),
                 }));
             } else {
@@ -286,6 +308,7 @@ function displayVttTranscript(vttTranscript, indexPoints) {
     const frag = document.createDocumentFragment();
     const vttArray = vttTranscript.split(timingsRegex);
     let previousTimestamp = null;
+    let indexCounter = 0;
     for (let i = 1; i < vttArray.length; i+=2) {
         const timingsLine = vttArray[i];
         const caption = vttArray[i+1];
@@ -302,6 +325,18 @@ function displayVttTranscript(vttTranscript, indexPoints) {
                 className: 'timestamp-link',
             }));
             previousTimestamp = timestamp;
+
+            // treat index points within a second of the line start time as being on this line
+            while (indexCounter < indexPoints.length && indexPoints[indexCounter].time <= timestamp + 1) {
+                span.appendChild(createElement('a', {
+                    href: '#index-point-' + indexCounter,
+                    className: 'fa index-link',
+                    id: 'transcript-index-point-' + indexCounter,
+                    ariaLabel: 'Read index notes',
+                    title: 'Read index notes'
+                }));
+                indexCounter++;
+            }
         }
 
         caption.replace(postCueRegex, '').split(voiceTagRegex).forEach((captionText, j) => {
@@ -315,8 +350,7 @@ function displayVttTranscript(vttTranscript, indexPoints) {
         para.appendChild(span);
         frag.appendChild(para);
     }
-
-    document.querySelector('#transcript').appendChild(frag);
+    return frag;
 }
 
 function parseVttTimestamp(timestamp) {
@@ -459,12 +493,7 @@ function displayMedia(data) {
             break;
         case 'other':
             if (data.media_url) {
-                const absRegex = /^https?:\/\//i
-                let src = data.media_url;
                 let mediaElement = 'video';
-                if (!absRegex.test(src)) {
-                    src = 'http://' + src;
-                }
 
                 if (data.media_clip_format === 'audio') {
                     mediaElement = 'audio';
@@ -472,7 +501,7 @@ function displayMedia(data) {
                 }
 
                 const media = document.createElement(mediaElement);
-                media.src = src;
+                media.src = ensureAbsolute(data.media_url);
                 media.controls = true;
                 media.preload = 'auto';
 
@@ -488,18 +517,11 @@ function displayMedia(data) {
 }
 
 function displayIndex(indexPoints, translate) {
-    let titleKey, partialTranscriptKey, synopsisKey;
-    if (translate) {
-        titleKey = 'title_alt';
-        partialTranscriptKey = 'partial_transcript_alt';
-        synopsisKey = 'synopsis_alt';
-    } else {
-        titleKey = 'title';
-        partialTranscriptKey = 'partial_transcript';
-        synopsisKey = 'synopsis';
-    }
-    const index = document.querySelector('#index');
     const frag = document.createDocumentFragment();
+    const translateKey = (key) => {
+       return translate ? key + '_alt' : key;
+    };
+
     indexPoints.forEach((indexPoint, i) => {
         const indexId = 'index-point-' + i;
         const div = createElement('div', {
@@ -509,7 +531,7 @@ function displayIndex(indexPoints, translate) {
 
         div.appendChild(createElement('span', {
             className: 'index-title',
-            textContent: indexPoint[titleKey],
+            textContent: indexPoint[translateKey('title')],
         }));
 
         const indexActions = createElement('div', {
@@ -526,7 +548,7 @@ function displayIndex(indexPoints, translate) {
 
         indexActions.appendChild(createElement('a', {
             href: '#transcript-index-point-' + i,
-            className: 'transcript-index-link',
+            className: 'fa transcript-index-link',
             textContent: '',
             ariaLabel: 'View in transcript',
             title: 'View in transcript',
@@ -534,7 +556,7 @@ function displayIndex(indexPoints, translate) {
 
         indexActions.appendChild(createElement('button', {
             type: 'button',
-            className: 'transcript-index-text-toggle',
+            className: 'fa transcript-index-text-toggle',
             ariaLabel: 'Toggle',
             title: 'Toggle',
             ariaExpanded: 'false',
@@ -546,24 +568,76 @@ function displayIndex(indexPoints, translate) {
             className: 'index-point-content',
         });
 
-        if (indexPoint.partial_transcript) {
+        if (indexPoint[translateKey('partial_transcript')]) {
             divContent.appendChild(createElement('blockquote', {
                 className: 'index-partial-transcript',
-                textContent: indexPoint[partialTranscriptKey],
+                textContent: indexPoint[translateKey('partial_transcript')],
             }));
         }
 
-        if (indexPoint.synopsis) {
+        if (indexPoint[translateKey('synopsis')]) {
             divContent.appendChild(createElement('span', {
                 className: 'index-synopsis',
-                textContent: indexPoint[synopsisKey],
+                textContent: indexPoint[translateKey('synopsis')],
             }));
         }
+
+        const indexPointMetadata = [];
+        indexPointMetadata.push(['index-keywords', 'Keywords', indexPoint[translateKey('keywords')].split(';').filter((e) => e)]);
+        indexPointMetadata.push(['index-subjects', 'Subjects', indexPoint[translateKey('subjects')].split(';').filter((e) => e)]);
+
+        const mapLinks = [];
+        indexPoint.gps_points.forEach((gpsPoint) => {
+            if (!gpsPoint.gps) {
+                return;
+            }
+            const zoom = gpsPoint.gps_zoom || '17';
+            const text = gpsPoint[translateKey('gps_text')] || 'View on map';
+            const mapUrl = 'https://maps.google.com/maps?ll=' + gpsPoint.gps + '&z=' + zoom + '&t=m';
+
+            mapLinks.push(createElement('a', {
+                href: mapUrl,
+                target: '_blank',
+                textContent: text,
+            }));
+        });
+        indexPointMetadata.push(['index-locations', 'Locations', mapLinks]);
+
+        const links = [];
+        indexPoint.hyperlinks.forEach((hyperlink) => {
+            if (!hyperlink.hyperlink) {
+                return;
+            }
+            links.push(createElement('a', {
+                href: ensureAbsolute(hyperlink.hyperlink),
+                target: '_blank',
+                textContent: hyperlink[translateKey('hyperlink_text')] || hyperlink.hyperlink,
+            }));
+        });
+        indexPointMetadata.push(['index-hyperlinks', 'Links', links]);
+
+        indexPointMetadata.forEach((metadataInfo) => {
+            const [className, label, data] = metadataInfo;
+            if (!data.length) {
+                return;
+            }
+
+            const container = document.createElement('div');
+            container.classList.add('index-meta', className);
+            container.appendChild(createElement('b', {textContent: label + ":"}));
+
+            let separator = ' ';
+            data.forEach((datum) => {
+                container.append(separator, datum);
+                separator = '; ';
+            });
+            divContent.appendChild(container);
+        });
 
         div.appendChild(divContent);
         frag.appendChild(div);
     });
-    index.appendChild(frag);
+    return frag;
 }
 
 function displayMetadata(data) {
@@ -582,6 +656,89 @@ function displayMetadata(data) {
     metadata.appendChild(frag);
 }
 
+function displayTextContent(data, translate) {
+    const viewer = document.querySelector('#viewer');
+    const transcriptContainer = document.querySelector('#transcript');
+    const indexContainer = document.querySelector('#index');
+    viewer.classList.remove('no-transcript', 'no-index');
+    let transcript, vttTranscript, sync;
+    if (translate) {
+        transcript = data.transcript_alt;
+        vttTranscript = data.vtt_transcript_alt;
+        sync = data.sync_alt;
+    } else {
+        transcript = data.transcript;
+        vttTranscript = data.vtt_transcript;
+        sync = data.sync;
+    }
+    if (vttTranscript) {
+        transcriptContainer.replaceChildren(displayVttTranscript(vttTranscript, data.index_points));
+    } else if (transcript) {
+        transcriptContainer.replaceChildren(displayTranscript(transcript, sync, data.index_points));
+    } else {
+        transcriptContainer.replaceChildren();
+        viewer.classList.add('no-transcript');
+    }
+    if (data.index_points.length) {
+        indexContainer.replaceChildren(displayIndex(data.index_points, translate));
+    } else {
+        indexContainer.replaceChildren(viewer.classList.add('no-index'));
+    }
+}
+
+function displayInfo(data) {
+    const info = document.querySelector('#info-content');
+    const dl = document.createElement('dl');
+    const optionalLink = (text, url) => {
+        if (url) {
+            if (!text) {
+                text = url;
+            }
+            return createElement('a', {
+                textContent: text,
+                href: ensureAbsolute(url),
+                target: '_blank',
+            });
+        }
+        return text;
+    }
+    const infoMetadata = {
+        'Title': data.title,
+        'Repository': optionalLink(data.repository, data.repository_url),
+        'Collection': optionalLink(data.collection_name, data.collection_link),
+        'Series': optionalLink(data.series_name, data.series_link),
+        'Interviewee': data.interviewee,
+        'Interviewer': data.interviewer,
+        'Language': data.language,
+        'Alternate Language': data.transcript_alt_lang,
+        'Rights Statement': data.rights,
+        'Usage Statement': data.usage,
+        'Acknowledgment': data.funding,
+    };
+
+    for (const [label, value] of Object.entries(infoMetadata)) {
+        if (!value || (Array.isArray(value) && !value.length)) {
+            continue;
+        }
+
+        dl.appendChild(createElement('dt', {textContent: label}));
+
+        const appendValue = (value) => {
+            const dd = document.createElement('dd');
+            dd.append(value);
+            dl.appendChild(dd);
+        };
+
+        if (Array.isArray(value)) {
+            value.forEach(appendValue);
+        } else {
+            appendValue(value);
+        }
+    }
+
+    info.appendChild(dl);
+}
+
 function createElement(tagName, properties) {
     const element = document.createElement(tagName);
     if (Object.hasOwn(properties, 'dataset')) {
@@ -597,63 +754,129 @@ function createElement(tagName, properties) {
 function setListeners() {
     document.body.addEventListener('click', (e) => {
         const target = e.target;
-        if (!target.matches('a.timestamp-link')) {
+        if (target.matches('a.timestamp-link')) {
+            e.preventDefault();
+            if (jumpToTime && 'seconds' in target.dataset) {
+                jumpToTime(target.dataset.seconds);
+            }
             return;
         }
-        e.preventDefault();
-        if (jumpToTime && 'seconds' in target.dataset) {
-            jumpToTime(target.dataset.seconds);
+        if (target.matches('.transcript-index-text-toggle')) {
+            const indexPoint = target.closest('.index-point');
+            target.ariaExpanded = indexPoint.classList.toggle('active') ? 'true' : 'false';
+            return;
+        }
+        if (target.matches('.index-link')) {
+            const indexPointId = target.getAttribute('href').replace('#', '');
+            const indexPoint = document.getElementById(indexPointId);
+            if (!document.body.classList.contains('mobile-index-active')) {
+                document.body.classList.add('mobile-index-active');
+            }
+            if (!indexPoint.classList.contains('active')) {
+                indexPoint.ariaExpanded = indexPoint.classList.add('active');
+            }
+            return;
+        }
+        if (target.matches('.transcript-index-link') && document.body.classList.contains('mobile-index-active')) {
+            document.body.classList.remove('mobile-index-active');
+        }
+        if (target.matches('#info-close')) {
+            document.querySelector('#info').close();
         }
     });
 }
 
-async function main(url, translate, showMetadata) {
+function setUpControls(data) {
+    const controls = document.querySelector('#controls');
+
+    const indexMobileButton = createElement('button', {
+        id: 'toggle-index',
+        className: 'fa',
+        type: 'button',
+        textContent: 'Toggle index'
+    })
+    indexMobileButton.addEventListener('click', async () => {
+        document.body.classList.toggle('mobile-index-active');
+    });
+    controls.appendChild(indexMobileButton);
+
+    const infoButton = createElement('button', {
+        id: 'show-info',
+        className: 'fa',
+        type: 'button',
+        ariaLabel: 'Show info',
+        title: 'Show info',
+    });
+    infoButton.addEventListener('click', () => {
+        document.querySelector('#info').showModal();
+    });
+    controls.appendChild(infoButton);
+
+    if (data.translate === '1') {
+        const translateLabelStem = 'Swap Language to ';
+        const originalLangLabel = translateLabelStem + (data.language || 'Original');
+        const alternateLangLabel = translateLabelStem + (data.transcript_alt_lang || 'Alternate');
+        let translating = false;
+        const translateButton = createElement('button', {
+            id: 'swap-language',
+            className: 'fa',
+            type: 'button',
+            ariaLabel: alternateLangLabel,
+            title: alternateLangLabel,
+        });
+        translateButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            translating = !translating;
+            const currentLabel = translating ? originalLangLabel : alternateLangLabel;
+            translateButton.ariaLabel = currentLabel;
+            translateButton.title = currentLabel;
+            displayTextContent(data, translating);
+        });
+        controls.appendChild(translateButton);
+    }
+    if (document.fullscreenEnabled) {
+        const fullscreenButton = createElement('button', {
+            id: 'fullscreen',
+            className: 'fa enter-fullscreen',
+            type: 'button',
+            ariaLabel: 'Fullscreen',
+            title: 'Fullscreen'
+        });
+        fullscreenButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+                fullscreenButton.ariaLabel = 'Fullscreen';
+                fullscreenButton.title = 'Fullscreen';
+                fullscreenButton.className = 'fa enter-fullscreen';
+            } else {
+                await document.body.requestFullscreen();
+                fullscreenButton.ariaLabel = 'Exit Fullscreen';
+                fullscreenButton.title = 'Exit Fullscreen';
+                fullscreenButton.className = 'fa exit-fullscreen';
+            }
+        });
+        controls.appendChild(fullscreenButton);
+    }
+}
+
+async function main(params) {
+    const url = params.cachefile;
     if (!url) {
         return;
     }
+
+    console.log(params);
+    if (params.link_color && /^[0-9A-Fa-f]{6}$/.test(params.link_color)) {
+        document.documentElement.style.setProperty('--link-color', '#' + params.link_color);
+    }
     const data = await parse(url);
+    setUpControls(data);
     setListeners();
-    if (showMetadata) {
+    if (params.metadata !== 'none') {
         displayMetadata(data);
     }
     displayMedia(data);
-
-    let transcript, vttTranscript, sync;
-    if (translate) {
-        transcript = data.transcript_alt;
-        vttTranscript = data.vtt_transcript_alt;
-        sync = data.sync_alt;
-    } else {
-        transcript = data.transcript;
-        vttTranscript = data.vtt_transcript;
-        sync = data.sync;
-    }
-    if (vttTranscript) {
-        displayVttTranscript(vttTranscript, data.index_points);
-    } else if (transcript) {
-        displayTranscript(transcript, sync, data.index_points);
-    } else {
-        document.querySelector('#viewer').classList.add('no-transcript');
-    }
-    if (data.index_points.length) {
-        displayIndex(data.index_points, translate);
-        let indexPoints, toggleButton;
-        indexPoints = document.getElementsByClassName('index-point');
-        for (const indexPoint of indexPoints) {
-            toggleButton = indexPoint.querySelector('.transcript-index-text-toggle');
-            toggleButton.addEventListener('click', (e) => {
-                const indexPointText = indexPoint.getElementsByClassName('index-point-content')[0];
-                toggleButton = e.target;
-                if (indexPointText.matches('.active')) {
-                    indexPointText.classList.remove('active');
-                    toggleButton.classList.remove('active');
-                } else {
-                    indexPointText.classList.add('active');
-                    toggleButton.classList.add('active');
-                }
-            });
-        }
-    } else {
-        document.querySelector('#viewer').classList.add('no-index');
-    }
+    displayTextContent(data, false);
+    displayInfo(data);
 }

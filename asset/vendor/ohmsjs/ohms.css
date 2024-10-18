@@ -29,10 +29,18 @@
     --link-color: #9d2963;
 }
 
+dialog::backdrop {
+    background: rgba(0, 0, 0, .6);
+}
+
 .screen-reader-text {
     position:absolute;
     top:-9999px;
     left:-9999px
+}
+
+html {
+    overflow: hidden;
 }
 
 body {
@@ -44,6 +52,9 @@ body {
     font-size: 14px;
     margin: 0;
 }
+body::backdrop {
+    background: #fff;
+}
 blockquote {
     font-size: 15px;
     font-style: italic;
@@ -52,9 +63,25 @@ blockquote {
     margin: 0;
 }
 
+dt {
+    font-weight: bold;
+}
+
+dd {
+    margin-left: 1.5rem;
+}
+
+dd + dt {
+    margin-top: .5rem;
+}
+
 a:link,
 a:visited {
     color: var(--link-color);
+}
+
+a.fa {
+    text-decoration: none;
 }
 
 h1 {
@@ -69,6 +96,7 @@ h1 {
     grid-template:
         "meta meta" min-content
         "player player" minmax(200px, 1fr)
+        "controls controls" min-content
         "transcript index" minmax(200px, 2fr) / 3fr 2fr;
 }
 #viewer.audio {
@@ -77,14 +105,24 @@ h1 {
         "player player" min-content
         "transcript index" minmax(200px, 2fr) / 3fr 2fr;
 }
+
 #main-metadata {
     text-align: center;
     grid-area: meta;
-    padding-bottom: 1em;
+    padding: 0 3em 1em;
 }
 
 #main-metadata:empty {
     padding: 0;
+}
+
+#controls {
+    grid-area: controls;
+    border-bottom: 1px solid var(--border-color);
+    padding: .5em 1em;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
 }
 
 #player {
@@ -96,7 +134,7 @@ h1 {
 #index {
     grid-area: index;
     border-left: 1px solid var(--border-color);
-    background: linear-gradient(to right, rgba(0,0,0,.15), #fff 1rem);
+    background: linear-gradient(to right, rgba(0,0,0,.15), transparent 1rem);
     padding-top: 1em;
 }
 #viewer.no-transcript  #index {
@@ -132,7 +170,7 @@ h1 {
 }
 
 #transcript-window, #index {
-    overflow-y: scroll;
+    overflow-y: auto;
     scroll-behavior: smooth;
     padding-right: 1em;
 }
@@ -179,7 +217,7 @@ h1 {
     display: none;
 }
 
-.index-point > .index-point-content.active {
+.index-point.active > .index-point-content {
     display: block;
 }
 
@@ -202,15 +240,20 @@ h1 {
     z-index: -1;
 }
 
-.index-link:before,
-.transcript-index-link:before {
+.fa:before {
     content: "\f02e";
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
+    display: inline-block;
+    min-width: .75rem;
 }
 
 .transcript-index-link {
     width: .75rem;
+}
+
+#viewer.no-transcript .transcript-index-link {
+    display: none;
 }
 
 .index-actions {
@@ -233,10 +276,100 @@ h1 {
 
 .transcript-index-text-toggle:before {
     content: "\f0da";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
 }
 
-.transcript-index-text-toggle.active:before {
+.index-point.active .transcript-index-text-toggle:before {
     content: "\f0d7";
+}
+
+.index-partial-transcript,
+.index-meta,
+.index-synopsis {
+    margin: 1em 0;
+}
+
+#controls button {
+    appearance: none;
+    background-color: var(--link-color);
+    color: #fff;
+    cursor: pointer;
+    border: 0;
+    border-radius: 2px;
+    padding: .125rem .25rem;
+    margin-left: .25rem;
+}
+
+.enter-fullscreen:before {
+    content: "\f424";
+}
+
+.exit-fullscreen:before {
+    content: "\f422";
+}
+
+#swap-language:before {
+    content: "\f0ac";
+}
+
+#show-info:before {
+    content: "\f129";
+}
+
+#toggle-index {
+    display: none;
+}
+
+#info {
+    padding: 1rem;
+    border: 1rem solid transparent;
+    box-sizing: border-box;
+}
+
+#info-close {
+    appearance: none;
+    background-color: transparent;
+    color: var(--link-color);
+    border: 0;
+    float: right;
+    font-size: 20px;
+}
+
+#info-close:before {
+    content: "\f00d";
+}
+
+@media screen and (max-width: 699px) {
+    #controls #toggle-index {
+        display: inline-block;
+        background-color: #fff;
+        color: var(--link-color);
+        margin-right: auto;
+    }
+
+    #toggle-index:before {
+        content: "\f204";
+        margin-right: .25em;
+    }
+
+    .mobile-index-active #toggle-index:before {
+        content: "\f205";
+    }
+
+    #transcript-window {
+        grid-area: transcript / transcript / index / index;
+    }
+
+    #index {
+        display: none;
+    }
+
+    .mobile-index-active #index {
+        grid-area: transcript / transcript / index / index;
+        display: block;
+        background: #fff;
+    }
+
+    .mobile-index-active #transcript-window {
+        display: none;
+    }
 }
