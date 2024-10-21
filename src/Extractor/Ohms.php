@@ -34,48 +34,57 @@ class Ohms implements ExtractorInterface
         $xpath = new DOMXPath($doc);
         $xpath->registerNamespace('o', 'https://www.weareavp.com/nunncenter/ohms');
 
+        $namespaced = true;
         $recordQuery = $xpath->query('//o:ROOT/o:record');
         if (!$recordQuery->count()) {
-            return $metadata;
+            $recordQuery = $xpath->query('//ROOT/record');
+            if (!$recordQuery->count()) {
+                return $metadata;
+            }
+            $namespaced = false;
         }
         $record = $recordQuery->item(0);
 
         $xpaths = [
-            'id' => 'string(@id)',
-            'dt' => 'string(@dt)',
-            'version' => 'string(o:version)',
-            'date' => 'string(o:date/@value)',
-            'date_nonpreferred_format' => 'string(o:date_nonpreferred_format)',
-            'cms_record_id' => 'string(ocms_record_id)',
-            'title' => 'string(o:title)',
-            'accession' => 'string(o:accession)',
-            'duration' => 'string(o:duration)',
-            'collection_id' => 'string(o:collection_id)',
-            'collection_name' => 'string(o:collection_name)',
-            'series_id' => 'string(o:series_id)',
-            'series_name' => 'string(o:series_name)',
-            'repository' => 'string(o:repository)',
-            'funding' => 'string(o:funding)',
-            'repository_url' => 'string(o:repository_url)',
-            'file_name' => 'string(o:file_name)',
-            'transcript_alt_lang' => 'string(o:transcript_alt_lang)',
-            'media_id' => 'string(o:media_id)',
-            'media_url' => 'string(o:media_url)',
-            'language' => 'string(o:language)',
-            'user_notes' => 'string(o:user_notes)',
-            'type' => 'string(o:type)',
-            'description' => 'string(o:description)',
-            'rel' => 'string(o:rel)',
-            'rights' => 'string(o:rights)',
-            'fmt' => 'string(o:fmt)',
-            'usage' => 'string(o:usage)',
-            'xmllocation' => 'string(o:xmllocation)',
-            'xmlfilename' => 'string(o:xmlfilename)',
-            'collection_link' => 'string(o:collection_link)',
-            'series_link' => 'string(o:series_link)',
+            'id' => '@id',
+            'dt' => '@dt',
+            'version' => 'version',
+            'date' => 'date/@value',
+            'date_nonpreferred_format' => 'date_nonpreferred_format',
+            'cms_record_id' => 'cms_record_id',
+            'title' => 'title',
+            'accession' => 'accession',
+            'duration' => 'duration',
+            'collection_id' => 'collection_id',
+            'collection_name' => 'collection_name',
+            'series_id' => 'series_id',
+            'series_name' => 'series_name',
+            'repository' => 'repository',
+            'funding' => 'funding',
+            'repository_url' => 'repository_url',
+            'file_name' => 'file_name',
+            'transcript_alt_lang' => 'transcript_alt_lang',
+            'media_id' => 'media_id',
+            'media_url' => 'media_url',
+            'language' => 'language',
+            'user_notes' => 'user_notes',
+            'type' => 'type',
+            'description' => 'description',
+            'rel' => 'rel',
+            'rights' => 'rights',
+            'fmt' => 'fmt',
+            'usage' => 'usage',
+            'xmllocation' => 'xmllocation',
+            'xmlfilename' => 'xmlfilename',
+            'collection_link' => 'collection_link',
+            'series_link' => 'series_link',
         ];
 
         foreach ($xpaths as $key => $xpathQuery) {
+            if ($xpathQuery[0] !== '@' && $namespaced) {
+                $xpathQuery = "o:$xpathQuery";
+            }
+            $xpathQuery = "string($xpathQuery)";
             $result = $xpath->evaluate($xpathQuery, $record);
             if (!is_string($result) || $result === '') {
                 continue;
@@ -84,14 +93,17 @@ class Ohms implements ExtractorInterface
         }
 
         $xpathsMulti = [
-            'subject' => 'o:subject',
-            'keyword' => 'o:keyword',
-            'interviewee' => 'o:interviewee',
-            'interviewer' => 'o:interviewer',
-            'format' => 'o:format',
+            'subject' => 'subject',
+            'keyword' => 'keyword',
+            'interviewee' => 'interviewee',
+            'interviewer' => 'interviewer',
+            'format' => 'format',
         ];
 
         foreach ($xpathsMulti as $key => $xpathQuery) {
+            if ($namespaced) {
+                $xpathQuery = "o:$xpathQuery";
+            }
             $result = $xpath->query($xpathQuery, $record);
             foreach ($result as $element) {
                 $text = $element->textContent;
