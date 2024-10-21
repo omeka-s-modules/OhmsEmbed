@@ -16,7 +16,7 @@ class OhmsEmbedRenderer implements RendererInterface
         ];
         return sprintf(
             '<iframe src="%s?%s" style="width: 100%%; height: 800px;" allowfullscreen></iframe>',
-            $view->assetUrl('vendor/ohmsjs/index.html', 'OhmsEmbed', false, false),
+            $view->assetUrl('vendor/ohmsjs/ohms.html', 'OhmsEmbed', false, false),
             http_build_query($query)
         );
     }
