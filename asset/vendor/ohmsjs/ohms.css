@@ -103,6 +103,7 @@ h1 {
     grid-template:
         "meta meta" min-content
         "player player" min-content
+        "controls controls" min-content
         "transcript index" minmax(200px, 2fr) / 3fr 2fr;
 }
 
@@ -256,6 +257,11 @@ h1 {
     display: none;
 }
 
+#viewer.no-transcript #index {
+    border-left: 0;
+    background: none;
+}
+
 .index-actions {
     display: flex;
     gap: .5rem;
@@ -356,18 +362,26 @@ h1 {
         content: "\f205";
     }
 
+    #viewer.no-transcript #controls #toggle-index {
+        display: none;
+    }
+
     #transcript-window {
         grid-area: transcript / transcript / index / index;
     }
 
+    #viewer.no-index #controls #toggle-index,
     #index {
         display: none;
     }
 
+    #viewer.no-transcript #index,
     .mobile-index-active #index {
         grid-area: transcript / transcript / index / index;
         display: block;
         background: #fff;
+        padding: 0;
+        max-width: none;
     }
 
     .mobile-index-active #transcript-window {
