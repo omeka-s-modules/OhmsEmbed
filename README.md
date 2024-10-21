@@ -1,4 +1,4 @@
-# Ohms Embed
+# OHMS Embed
 
 An [Omeka S](https://omeka.org/s/) module for embedding [Oral History Metadata Synchronizer](https://www.oralhistoryonline.org/) objects Omeka S installations.
 
@@ -6,7 +6,7 @@ An [Omeka S](https://omeka.org/s/) module for embedding [Oral History Metadata S
 
 # Copyright
 
-Ohms Embed is Copyright © 2024-present Corporation for Digital Scholarship, 
+OHMS Embed is Copyright © 2024-present Corporation for Digital Scholarship, 
 Vienna, Virginia, USA http://digitalscholar.org
 
 The Corporation for Digital Scholarship distributes the Omeka source code
