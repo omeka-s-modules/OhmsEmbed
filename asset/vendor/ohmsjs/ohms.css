@@ -51,6 +51,8 @@ body {
     font-family: Merriweather, Georgia, sans-serif;
     font-size: 14px;
     margin: 0;
+    background: #fff;
+    color: #000;
 }
 body::backdrop {
     background: #fff;
@@ -136,7 +138,6 @@ h1 {
     grid-area: index;
     border-left: 1px solid var(--border-color);
     background: linear-gradient(to right, rgba(0,0,0,.15), transparent 1rem);
-    padding-top: 1em;
 }
 #viewer.no-transcript  #index {
     grid-column-start: transcript;
@@ -157,7 +158,7 @@ h1 {
 #transcript {
     position: relative;
     margin-left: 10ch;
-    margin-top: 2em;
+    margin-top: 1em;
 }
 #transcript .timestamp-link {
     position: absolute;

@@ -12,7 +12,7 @@ async function getCachefile(url) {
 
 async function parse(url) {
     const cachefile = await getCachefile(url);
-    const parser = new DOMParser;
+    const parser = new DOMParser();
     const doc = parser.parseFromString(cachefile, 'application/xml');
     const record = doc.documentElement.querySelector('record');
 
@@ -45,14 +45,14 @@ async function parse(url) {
         vtt_transcript_alt: getChildText(record, 'vtt_transcript_alt'),
         interviewer: getChildrenTexts(record, 'interviewer'),
         interviewee: getChildrenTexts(record, 'interviewee'),
-    }
+    };
 
     const mediafile = record.querySelector('mediafile');
-    data['media_host'] = getChildText(mediafile, 'host');
-    data['media_host_account_id'] = getChildText(mediafile, 'host_account_id');
-    data['media_host_player_id'] = getChildText(mediafile, 'host_player_id');
-    data['media_host_clip_id'] = getChildText(mediafile, 'host_clip_id');
-    data['media_clip_format'] = getChildText(mediafile, 'clip_format');
+    data.media_host = getChildText(mediafile, 'host');
+    data.media_host_account_id = getChildText(mediafile, 'host_account_id');
+    data.media_host_player_id = getChildText(mediafile, 'host_player_id');
+    data.media_host_clip_id = getChildText(mediafile, 'host_clip_id');
+    data.media_clip_format = getChildText(mediafile, 'clip_format');
 
     const indexPoints = record.querySelectorAll(':scope > index > point');
     data.index_points = Array.from(indexPoints, (point) => {
@@ -301,10 +301,10 @@ function extractFootnotes(transcript) {
 }
 
 function displayVttTranscript(vttTranscript, indexPoints) {
-    const timingsRegex = /(^.*-->.*$)/m
-    const voiceTagRegex = /<v(?:\.[^ \t>]+)?[ \t]([^>]*)>/
-    const vttTagRegex = /<\/?[^>]*>/g
-    const postCueRegex = /\n\n.*/ms
+    const timingsRegex = /(^.*-->.*$)/m;
+    const voiceTagRegex = /<v(?:\.[^ \t>]+)?[ \t]([^>]*)>/;
+    const vttTagRegex = /<\/?[^>]*>/g;
+    const postCueRegex = /\n\n.*/ms;
     const frag = document.createDocumentFragment();
     const vttArray = vttTranscript.split(timingsRegex);
     let previousTimestamp = null;
@@ -354,7 +354,7 @@ function displayVttTranscript(vttTranscript, indexPoints) {
 }
 
 function parseVttTimestamp(timestamp) {
-    const timestampRegex = /(?:([0-9]{2}):)?([0-9]{2}):([0-9]{2})\.([0-9]{3})/
+    const timestampRegex = /(?:([0-9]{2}):)?([0-9]{2}):([0-9]{2})\.([0-9]{3})/;
     const match = timestamp.match(timestampRegex);
     let hours = 0, minutes = 0, seconds = 0;
     if (!match) {
@@ -382,7 +382,7 @@ function displayMedia(data) {
             if (data.media_url) {
                 videoUrl = data.media_url;
             } else if (data.kembed) {
-                const parser = new DOMParser;
+                const parser = new DOMParser();
                 const embedDoc = parser.parseFromString(data.kembed, 'text/html');
                 const iframe = embedDoc.querySelector('iframe');
                 videoUrl = iframe.src;
@@ -411,7 +411,7 @@ function displayMedia(data) {
             if (data.media_url) {
                 videoId = data.media_url.replace(/^https?:\/\/youtu.be\//, '');
             } else if (data.kembed) {
-                const parser = new DOMParser;
+                const parser = new DOMParser();
                 const embedDoc = parser.parseFromString(data.kembed, 'text/html');
                 const iframe = embedDoc.querySelector('iframe');
                 videoId = new URL(iframe.src).pathname.replace(/^\/embed\//, '');
@@ -436,7 +436,7 @@ function displayMedia(data) {
                             ytPlayer.playVideo();
                         }
                     };
-                }
+                };
                 document.body.appendChild(script);
             }
             break;
@@ -455,7 +455,7 @@ function displayMedia(data) {
             break;
         case 'kaltura':
             if (data.kembed) {
-                const parser = new DOMParser;
+                const parser = new DOMParser();
                 const embedDoc = parser.parseFromString(data.kembed, 'text/html');
                 const iframe = embedDoc.querySelector('iframe');
                 const kalturaUrlRegex = /\/p\/([0-9]+)\/sp\/(?:[0-9]+)00\/embedIframeJs\/uiconf_id\/([0-9]+)\//;
@@ -483,7 +483,7 @@ function displayMedia(data) {
                             jumpToTime = (seconds) => {
                                 kdp.sendNotification('doSeek', seconds);
                                 kdp.sendNotification('doPlay');
-                            }
+                            };
                         }
                     });
                 });
@@ -643,14 +643,14 @@ function displayIndex(indexPoints, translate) {
 function displayMetadata(data) {
     const metadata = document.querySelector('#main-metadata');
     const frag = document.createDocumentFragment();
-    const title = data['title'] || 'Untitled';
+    const title = data.title || 'Untitled';
     document.title = title;
 
     frag.appendChild(createElement('h1', {textContent: title}));
 
     frag.appendChild(createElement('span', {
         className: 'repository',
-        textContent: data['repository'],
+        textContent: data.repository,
     }));
 
     metadata.appendChild(frag);
@@ -701,7 +701,7 @@ function displayInfo(data) {
             });
         }
         return text;
-    }
+    };
     const infoMetadata = {
         'Title': data.title,
         'Repository': optionalLink(data.repository, data.repository_url),
@@ -794,7 +794,7 @@ function setUpControls(data) {
         className: 'fa',
         type: 'button',
         textContent: 'Toggle index'
-    })
+    });
     indexMobileButton.addEventListener('click', () => {
         document.body.classList.toggle('mobile-index-active');
     });
@@ -872,7 +872,6 @@ async function main(params) {
         return;
     }
 
-    console.log(params);
     if (params.link_color && /^[0-9A-Fa-f]{6}$/.test(params.link_color)) {
         document.documentElement.style.setProperty('--link-color', '#' + params.link_color);
     }
