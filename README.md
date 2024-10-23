@@ -10,10 +10,10 @@ so `ohms.html?cachefile=example.xml` where `example.xml` is the XML file's URL. 
 
 ### Customization
 
-Additional query string parameters can be used to customize the viewer interface. Currently there is only one supported, to
-change the color used for links within the viewer:
+Additional query string parameters can be used to customize the viewer interface.
 
 - `link_color`: sets the color used for links; pass a six-character hex color code without the leading `#`
+- `metadata`: pass `none` to disable displaying the title and repository on the top of the viewer
 
 ## Cross-origin files and CORS
 
