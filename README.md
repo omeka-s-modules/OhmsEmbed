@@ -6,10 +6,9 @@ This module will add an OHMS viewer to places where media can be embedded, allow
 
 - Manual: https://omeka.org/s/docs/user-manual/modules/ohmsembed/
 
-# Copyright
+## Copyright
 
-OHMS Embed is Copyright © 2024-present Corporation for Digital Scholarship, 
-Vienna, Virginia, USA http://digitalscholar.org
+OHMS Embed is Copyright © 2024-present [Corporation for Digital Scholarship](https://digitalscholar.org)
 
 The Corporation for Digital Scholarship distributes the Omeka source code
 under the GNU General Public License, version 3 (GPLv3). The full text
