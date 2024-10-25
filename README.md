@@ -1,6 +1,8 @@
 # OHMS Embed
 
-An [Omeka S](https://omeka.org/s/) module for embedding [Oral History Metadata Synchronizer](https://www.oralhistoryonline.org/) objects Omeka S installations.
+An [Omeka S](https://omeka.org/s/) module that allows site administrators to add [Oral History Metadata Synchronizer](https://www.oralhistoryonline.org/) objects as media to Omeka S items.
+
+This module will add an OHMS viewer to places where media can be embedded, allowing users to view indexes, transcripts, and/or translations of videos and audio as they are played. To build OHMS objects you will need an OHMS account. For more information, see the manual and the [OHMS website](https://www.oralhistoryonline.org/). 
 
 - Manual: https://omeka.org/s/docs/user-manual/modules/ohmsembed/
 
