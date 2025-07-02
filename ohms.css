@@ -86,8 +86,13 @@ a.fa {
     text-decoration: none;
 }
 
-h1 {
-    font-size: 1.4em;
+h3 {
+    font-size: 1.2em;
+    margin: 0
+}
+.repository {
+    display: block;
+    margin-top: 0.2em;
 }
 #viewer {
     display: grid;
@@ -112,7 +117,7 @@ h1 {
 #main-metadata {
     text-align: center;
     grid-area: meta;
-    padding: 0 3em 1em;
+    padding: 1em 3em;
 }
 
 #main-metadata:empty {
@@ -225,6 +230,7 @@ h1 {
 
 .index-title {
     font-weight: bold;
+    overflow-wrap: anywhere;
 }
 
 #player {
@@ -243,7 +249,7 @@ h1 {
 }
 
 .fa:before {
-    content: "\f02e";
+    content: "\f02e" / "";
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
     display: inline-block;
@@ -282,11 +288,11 @@ h1 {
 }
 
 .transcript-index-text-toggle:before {
-    content: "\f0da";
+    content: "\f0da" / "";
 }
 
 .index-point.active .transcript-index-text-toggle:before {
-    content: "\f0d7";
+    content: "\f0d7" / "";
 }
 
 .index-partial-transcript,
@@ -307,19 +313,19 @@ h1 {
 }
 
 .enter-fullscreen:before {
-    content: "\f424";
+    content: "\f424" / "";
 }
 
 .exit-fullscreen:before {
-    content: "\f422";
+    content: "\f422" / "";
 }
 
 #swap-language:before {
-    content: "\f0ac";
+    content: "\f0ac" / "";
 }
 
 #show-info:before {
-    content: "\f129";
+    content: "\f129" / "";
 }
 
 #toggle-index {
@@ -343,7 +349,7 @@ h1 {
 }
 
 #info-close:before {
-    content: "\f00d";
+    content: "\f00d" / "";
 }
 
 @media screen and (max-width: 699px) {
@@ -355,12 +361,12 @@ h1 {
     }
 
     #toggle-index:before {
-        content: "\f204";
+        content: "\f204" / "";
         margin-right: .25em;
     }
 
     .mobile-index-active #toggle-index:before {
-        content: "\f205";
+        content: "\f205" / "";
     }
 
     #viewer.no-transcript #controls #toggle-index {
