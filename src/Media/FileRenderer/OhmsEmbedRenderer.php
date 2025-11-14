@@ -5,7 +5,6 @@ namespace OhmsEmbed\Media\FileRenderer;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Media\FileRenderer\RendererInterface;
 use Laminas\View\Renderer\PhpRenderer;
-use Omeka\Media\FileRenderer\ThumbnailRenderer;
 
 class OhmsEmbedRenderer implements RendererInterface
 {
@@ -15,9 +14,10 @@ class OhmsEmbedRenderer implements RendererInterface
             'cachefile' => $media->originalUrl(),
         ];
         return sprintf(
-            '<iframe src="%s?%s" style="width: 100%%; height: 800px;" allowfullscreen></iframe>',
+            '<iframe src="%s?%s" style="width: 100%%; height: 800px;" title="%s" allowfullscreen></iframe>',
             $view->assetUrl('vendor/ohmsjs/ohms.html', 'OhmsEmbed', false, false),
-            http_build_query($query)
+            http_build_query($query),
+            $view->escapeHtml($media->altText())
         );
     }
 }
